@@ -30,3 +30,11 @@ The report includes a variety of parameters, including a parameter for the distr
 # 7. Report Slicers
 
 The report includes a variety of slicers, including a slicer for the district and a slicer for the item category. The slicers are located in the `Retail Analysis Sample PBIX.Report` folder.
+
+# 8. Report Measures
+
+The report includes a variety of measures, including a measure for the sales and a measure for the profit. The measures are located in the `Retail Analysis Sample PBIX.Report` folder.
+
+# 9. Report Calculations
+
+The report includes a variety of calculations, including a calculation for the sales and a calculation for the profit. The calculations are located in the `Retail Analysis Sample PBIX.Report` folder.
