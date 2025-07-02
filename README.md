@@ -22,3 +22,11 @@ The report includes a variety of visualizations, including clustered column char
 # 5. Report Filters
 
 The report includes a variety of filters, including a filter for the district and a filter for the item category. The filters are located in the `Retail Analysis Sample PBIX.Report` folder.
+
+# 6. Report Parameters
+
+The report includes a variety of parameters, including a parameter for the district and a parameter for the item category. The parameters are located in the `Retail Analysis Sample PBIX.Report` folder.
+
+# 7. Report Slicers
+
+The report includes a variety of slicers, including a slicer for the district and a slicer for the item category. The slicers are located in the `Retail Analysis Sample PBIX.Report` folder.
