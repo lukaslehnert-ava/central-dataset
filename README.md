@@ -38,3 +38,11 @@ The report includes a variety of measures, including a measure for the sales and
 # 9. Report Calculations
 
 The report includes a variety of calculations, including a calculation for the sales and a calculation for the profit. The calculations are located in the `Retail Analysis Sample PBIX.Report` folder.
+
+# 10. Report Tables
+
+The report includes a variety of tables, including a table for the sales and a table for the profit. The tables are located in the `Retail Analysis Sample PBIX.Report` folder.
+
+# 11. Report Charts
+
+The report includes a variety of charts, including a chart for the sales and a chart for the profit. The charts are located in the `Retail Analysis Sample PBIX.Report` folder.
