@@ -18,7 +18,7 @@ table underwriting_cockpit
 		annotation SummarizationSetBy = Automatic
 
 	column 'Risk Score'
-		dataType: int32
+		dataType: int64
 		formatString: 0
 		lineageTag: 6a1cf645-c310-47f7-9b84-d42ac22cfc4c
 		summarizeBy: sum
