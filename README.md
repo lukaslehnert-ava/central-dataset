@@ -1,4 +1,4 @@
-# Central Dataset Workspace
+# PBI-int-test
 
 # 1. Introduction
 
@@ -22,19 +22,3 @@ The report includes a variety of visualizations, including clustered column char
 # 5. Report Filters
 
 The report includes a variety of filters, including a filter for the district and a filter for the item category. The filters are located in the `Retail Analysis Sample PBIX.Report` folder.
-
-# 6. Report Parameters
-
-The report includes a variety of parameters, including a parameter for the district and a parameter for the item category. The parameters are located in the `Retail Analysis Sample PBIX.Report` folder.
-
-# 7. Report Slicers
-
-The report includes a variety of slicers, including a slicer for the district and a slicer for the item category. The slicers are located in the `Retail Analysis Sample PBIX.Report` folder.
-
-# 8. Report Measures
-
-The report includes a variety of measures, including a measure for the sales and a measure for the profit. The measures are located in the `Retail Analysis Sample PBIX.Report` folder.
-
-# 9. Report Calculations
-
-The report includes a variety of calculations, including a calculation for the sales and a calculation for the profit. The calculations are located in the `Retail Analysis Sample PBIX.Report` folder.
