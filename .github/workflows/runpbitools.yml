@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'central-dataset/Sales-Cockpit/**'
+      - 'Sales-Cockpit/**'
 
 jobs:
   build:
@@ -32,7 +32,7 @@ jobs:
         run: |
           mkdir -p artifacts
           pbi-tools.core compile \
-            central-dataset/Sales-Cockpit/sales-semo.pbip
+            Sales-Cockpit/sales-semo.pbip
             overwrite
 
       - name: Upload PBIX artifact
