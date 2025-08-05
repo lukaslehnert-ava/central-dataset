@@ -1,26 +1,29 @@
-# .github/workflows/pbi-tools-install.yml
-name: pbi-tools install
+name: pbi-tools install & inspect
 
-on:
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
-  install-and-verify:
+  install:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Download pbi-tools Core CLI
+      - name: Download Core CLI ZIP
         run: |
           mkdir -p tools
-          curl -L -o tools/pbi-tools.core.1.2.0_linux-x64.zip \
+          curl -fsSL -o tools/pbi-tools.core.1.2.0_linux-x64.zip \
             https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.core.1.2.0_linux-x64.zip
+
+      - name: Unzip CLI into tools/
+        run: |
           unzip -q tools/pbi-tools.core.1.2.0_linux-x64.zip -d tools
-          chmod +x tools/pbi-tools*
 
-      - name: Add CLI to PATH
-        run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
+      - name: See what got unzipped
+        run: ls -l tools
 
-      - name: Verify pbi-tools
-        run: pbi-tools --version
+      - name: Run the actual binary
+        run: |
+          # replace <NAME> below with the filename you saw above, e.g. pbi-tools or pbi-tools.core
+          chmod +x tools/<NAME>
+          tools/<NAME> --version
