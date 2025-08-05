@@ -1,5 +1,5 @@
 # .github/workflows/pbi-tools-docker.yml
-name: pbi-tools via Docker
+name: pbi-tools via Docker (robust)
 
 on:
   workflow_dispatch:
@@ -13,24 +13,57 @@ jobs:
       - name: Pull image
         run: docker pull ghcr.io/pbi-tools/pbi-tools-core:1.2.0
 
+      # Discover the CLI name & PATH inside the container
+      - name: Diagnose container PATH and tool location
+        run: |
+          docker run --rm ghcr.io/pbi-tools/pbi-tools-core:1.2.0 \
+            bash -lc '
+              echo "PATH=$PATH"
+              echo "Which pbi-tools.core:"
+              command -v pbi-tools.core || true
+              echo "Which pbi-tools:"
+              command -v pbi-tools || true
+              echo "~/.dotnet/tools contents:"
+              ls -la ~/.dotnet/tools || true
+              echo "Global dotnet tools:"
+              dotnet tool list -g || true
+            '
+
+      # Version check using whichever command exists
       - name: Version check
         run: |
-          docker run --rm -v "${{ github.workspace }}:/work" -w /work \
-            ghcr.io/pbi-tools/pbi-tools-core:1.2.0 \
-            bash -lc 'pbi-tools.core --version'
+          docker run --rm ghcr.io/pbi-tools/pbi-tools-core:1.2.0 \
+            bash -lc '
+              CMD="$(command -v pbi-tools.core || command -v pbi-tools || echo "")"
+              if [ -z "$CMD" ]; then
+                echo "❌ could not find pbi-tools(.core) in PATH"; exit 127
+              fi
+              echo "Using: $CMD"
+              "$CMD" --version
+            '
 
-      # Example: compile all PBIP projects to PBIX/PBIT
+      # Example: compile all PBIP projects -> PBIX/PBIT
       - name: Compile PBIP projects
         run: |
           mkdir -p artifacts
-          bash -lc '
-            shopt -s globstar nullglob
-            for f in **/*.pbip; do
-              proj_dir="$(dirname "$f")"
-              name="$(basename "$proj_dir")"
-              echo "Compiling $proj_dir → artifacts/${name}.pbix"
-              docker run --rm -v "${GITHUB_WORKSPACE}:/work" -w /work \
-                ghcr.io/pbi-tools/pbi-tools-core:1.2.0 \
-                bash -lc "pbi-tools.core compile \"$proj_dir\" artifacts \"${name}.pbix\" overwrite"
-            done
-          '
+          docker run --rm -v "${{ github.workspace }}:/work" -w /work \
+            ghcr.io/pbi-tools/pbi-tools-core:1.2.0 \
+            bash -lc '
+              set -e
+              CMD="$(command -v pbi-tools.core || command -v pbi-tools)"
+              echo "Using: $CMD"
+              shopt -s globstar nullglob
+              for f in **/*.pbip; do
+                proj_dir="$(dirname "$f")"
+                name="$(basename "$proj_dir")"
+                echo "Compiling $proj_dir → artifacts/${name}.pbix"
+                "$CMD" compile "$proj_dir" artifacts "${name}.pbix" overwrite
+              done
+            '
+
+      - name: Upload PBIX artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pbix
+          path: artifacts/*.pbix
