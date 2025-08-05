@@ -1,4 +1,3 @@
-# .github/workflows/pbi-tools-build.yml
 name: Build Central Dataset PBIP
 
 on:
@@ -11,8 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Download pbi-tools Core CLI
         run: |
@@ -26,21 +24,20 @@ jobs:
       - name: Add CLI to PATH
         run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
 
-      - name: Show repo tree (for debugging)
+      - name: Show repo tree
         run: ls -R .
 
-      - name: Compile all PBIP projects
+      - name: Compile Sales-Cockpit project → PBIT
         run: |
           mkdir -p artifacts
-          shopt -s globstar nullglob
-          for pbip in $(find . -type f -name '*.pbip'); do
-            name=$(basename "$pbip" .pbip)
-            echo "📊 Compiling $pbip → artifacts/${name}.pbix"
-            pbi-tools.core compile "$pbip" artifacts "${name}.pbix" overwrite
-          done
+          pbi-tools.core compile \
+            Sales-Cockpit \
+            artifacts \
+            sales-semo.pbit \
+            overwrite
 
-      - name: Upload PBIX artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: all-pbix
-          path: artifacts/*.pbix
+          name: sales-semo-pbit
+          path: artifacts/sales-semo.pbit
