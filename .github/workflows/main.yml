@@ -1,5 +1,5 @@
 # .github/workflows/pbi-tools-install.yml
-name: Install pbi-tools Core
+name: Install & verify pbi-tools
 
 on:
   workflow_dispatch:
@@ -11,19 +11,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download pbi-tools Core CLI
+      - name: Download Core CLI ZIP
         run: |
           mkdir -p tools
-          curl -fsSL \
-            -o tools/pbi-tools.core.1.2.0_linux-x64.zip \
+          curl -fsSL -o tools/pbi-tools.core.1.2.0_linux-x64.zip \
             https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.core.1.2.0_linux-x64.zip
           unzip -q tools/pbi-tools.core.1.2.0_linux-x64.zip -d tools
-          chmod +x tools/pbi-tools*
+          chmod +x tools/pbi-tools.core
 
       - name: Add CLI to PATH
         run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
 
-      - name: Verify installation
+      - name: Verify pbi-tools installation
         run: |
-          # Calling with no args prints the help header (including the version)
-          pbi-tools.core
+          # The 'info' command prints version and exits
+          pbi-tools.core info
