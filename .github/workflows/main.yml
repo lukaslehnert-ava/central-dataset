@@ -1,5 +1,5 @@
 # .github/workflows/pbi-tools-docker.yml
-name: pbi-tools via Docker (ENTRYPOINT)
+name: pbi-tools via Docker
 
 on:
   workflow_dispatch:
@@ -13,12 +13,48 @@ jobs:
       - name: Pull image
         run: docker pull ghcr.io/pbi-tools/pbi-tools-core:1.2.0
 
-      - name: Version check (use image ENTRYPOINT)
-        run: docker run --rm ghcr.io/pbi-tools/pbi-tools-core:1.2.0 --version
+      - name: Version check (bootstrap CLI inside container)
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/work" -w /work \
+            ghcr.io/pbi-tools/pbi-tools-core:1.2.0 \
+            bash -lc '
+              set -e
+              apt-get update -y >/dev/null && apt-get install -y curl unzip >/dev/null
+              mkdir -p /opt/pbi-tools && cd /opt/pbi-tools
+              curl -L -o pbi-tools.zip \
+                https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.core.1.2.0_linux-x64.zip
+              unzip -o pbi-tools.zip >/dev/null
+              chmod +x pbi-tools
+              /opt/pbi-tools/pbi-tools --version
+            '
 
+      # Example: compile PBIP -> PBIX
       - name: Compile PBIP → PBIX
         run: |
           mkdir -p artifacts
           docker run --rm -v "${{ github.workspace }}:/work" -w /work \
             ghcr.io/pbi-tools/pbi-tools-core:1.2.0 \
-            compile reports/SalesReport artifacts SalesReport.pbix overwrite
+            bash -lc '
+              set -e
+              apt-get update -y >/dev/null && apt-get install -y curl unzip >/dev/null
+              if [ ! -x /opt/pbi-tools/pbi-tools ]; then
+                mkdir -p /opt/pbi-tools && cd /opt/pbi-tools
+                curl -L -o pbi-tools.zip \
+                  https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.core.1.2.0_linux-x64.zip
+                unzip -o pbi-tools.zip >/dev/null
+                chmod +x pbi-tools
+              fi
+              shopt -s globstar nullglob
+              for f in **/*.pbip; do
+                proj_dir="$(dirname "$f")"
+                name="$(basename "$proj_dir")"
+                echo "Compiling $proj_dir → artifacts/${name}.pbix"
+                /opt/pbi-tools/pbi-tools compile "$proj_dir" artifacts "${name}.pbix" overwrite
+              done
+            '
+
+      - name: Upload PBIX artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pbix
+          path: artifacts/*.pbix
