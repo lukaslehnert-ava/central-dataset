@@ -7,54 +7,39 @@ on:
 jobs:
   pbi-tools:
     runs-on: ubuntu-latest
+
+    # This tells Actions to run *everything* inside the specified container.
+    # It still “runs the docker image,” but you don’t have to do `docker run` yourself.
+    container:
+      image: ghcr.io/pbi-tools/pbi-tools-core:1.2.0
+      # If your org blocks anonymous pulls from GHCR, uncomment:
+      # permissions:
+      #   packages: read
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - name: Pull image
-        run: docker pull ghcr.io/pbi-tools/pbi-tools-core:1.2.0
-
-      - name: Version check (bootstrap CLI inside container)
+      - name: Verify pbi-tools is on PATH
         run: |
-          docker run --rm -v "${{ github.workspace }}:/work" -w /work \
-            ghcr.io/pbi-tools/pbi-tools-core:1.2.0 \
-            bash -lc '
-              set -e
-              apt-get update -y >/dev/null && apt-get install -y curl unzip >/dev/null
-              mkdir -p /opt/pbi-tools && cd /opt/pbi-tools
-              curl -L -o pbi-tools.zip \
-                https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.core.1.2.0_linux-x64.zip
-              unzip -o pbi-tools.zip >/dev/null
-              chmod +x pbi-tools
-              /opt/pbi-tools/pbi-tools --version
-            '
+          pbi-tools --version
+          pbi-tools --help
 
-      # Example: compile PBIP -> PBIX
-      - name: Compile PBIP → PBIX
+      # ↳ Now you can call any pbi-tools command exactly as if you’d installed it:
+      - name: Extract a PBIX into folder
+        run: |
+          mkdir -p src
+          pbi-tools extract "./reports/MyReport.pbix" ./src/MyReport
+
+      - name: Compile PBIP → PBIX artifact
         run: |
           mkdir -p artifacts
-          docker run --rm -v "${{ github.workspace }}:/work" -w /work \
-            ghcr.io/pbi-tools/pbi-tools-core:1.2.0 \
-            bash -lc '
-              set -e
-              apt-get update -y >/dev/null && apt-get install -y curl unzip >/dev/null
-              if [ ! -x /opt/pbi-tools/pbi-tools ]; then
-                mkdir -p /opt/pbi-tools && cd /opt/pbi-tools
-                curl -L -o pbi-tools.zip \
-                  https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.core.1.2.0_linux-x64.zip
-                unzip -o pbi-tools.zip >/dev/null
-                chmod +x pbi-tools
-              fi
-              shopt -s globstar nullglob
-              for f in **/*.pbip; do
-                proj_dir="$(dirname "$f")"
-                name="$(basename "$proj_dir")"
-                echo "Compiling $proj_dir → artifacts/${name}.pbix"
-                /opt/pbi-tools/pbi-tools compile "$proj_dir" artifacts "${name}.pbix" overwrite
-              done
-            '
+          pbi-tools compile ./src/MyReport ./artifacts MyReport.pbit overwrite
 
-      - name: Upload PBIX artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: pbix
-          path: artifacts/*.pbix
+          name: pbi-tools-artifacts
+          path: |
+            src/**
+            artifacts/**
