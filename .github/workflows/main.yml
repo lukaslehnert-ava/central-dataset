@@ -24,22 +24,3 @@ jobs:
         run: |
           pbi-tools --version
           pbi-tools --help
-
-      # ↳ Now you can call any pbi-tools command exactly as if you’d installed it:
-      - name: Extract a PBIX into folder
-        run: |
-          mkdir -p src
-          pbi-tools extract "./reports/MyReport.pbix" ./src/MyReport
-
-      - name: Compile PBIP → PBIX artifact
-        run: |
-          mkdir -p artifacts
-          pbi-tools compile ./src/MyReport ./artifacts MyReport.pbit overwrite
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: pbi-tools-artifacts
-          path: |
-            src/**
-            artifacts/**
