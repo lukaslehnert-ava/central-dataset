@@ -1,21 +1,48 @@
-# .github/workflows/pbi-tools-check.yml
-name: pbi-tools check
+# .github/workflows/pbi-tools.yml
+name: pbi-tools via dotnet-tool
 
 on:
   workflow_dispatch:
 
 jobs:
-  check:
+  pbi-tools:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/pbi-tools/pbi-tools-core:latest
-      options: --user root
-      env:
-        PATH: /root/.dotnet/tools:${PATH}
-
     steps:
-      - name: Checkout
+      - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Verify pbi-tools
-        run: pbi-tools --version
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Install pbi-tools Core
+        run: |
+          dotnet tool install --global pbi-tools.core --version 1.2.0
+        # Global tools go to ~/.dotnet/tools by default :contentReference[oaicite:0]{index=0}
+
+      - name: Add global tools to PATH & verify
+        run: |
+          echo "PATH=$HOME/.dotnet/tools:$PATH"
+          export PATH="$HOME/.dotnet/tools:$PATH"
+          pbi-tools.core --version
+          pbi-tools.core --help
+
+      # ↳ from here on you can just call pbi-tools.core directly
+      - name: Extract a PBIX into source
+        run: |
+          mkdir -p src
+          pbi-tools.core extract "./reports/MyReport.pbix" ./src/MyReport
+
+      - name: Compile PBIP → PBIX
+        run: |
+          mkdir -p artifacts
+          pbi-tools.core compile ./src/MyReport ./artifacts MyReport.pbit overwrite
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pbi-tools-output
+          path: |
+            src/**
+            artifacts/**
