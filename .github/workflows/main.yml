@@ -7,26 +7,20 @@ on:
 jobs:
   pbi-tools:
     runs-on: ubuntu-latest
-    # If your org restricts GHCR pulls, uncomment:
-    # permissions:
-    #   packages: read
     steps:
       - uses: actions/checkout@v4
 
-      - name: Pull image (optional explicit pull + retry)
-        run: |
-          for i in {1..3}; do
-            docker pull ghcr.io/pbi-tools/pbi-tools-core:1.2.0 && break || sleep 5
-          done
+      - name: Pull image
+        run: docker pull ghcr.io/pbi-tools/pbi-tools-core:1.2.0
 
-      - name: pbi-tools version
+      - name: Version check
         run: |
           docker run --rm -v "${{ github.workspace }}:/work" -w /work \
             ghcr.io/pbi-tools/pbi-tools-core:1.2.0 \
-            /root/.dotnet/tools/pbi-tools --version
+            bash -lc 'pbi-tools --version'
 
-      # Example real work: compile all PBIP projects to PBIX artifacts
-      - name: Compile PBIP → PBIX
+      # Example real work: compile PBIP -> PBIX
+      - name: Compile PBIP projects
         run: |
           mkdir -p artifacts
           bash -lc '
@@ -37,12 +31,11 @@ jobs:
               echo "Compiling $proj_dir → artifacts/${name}.pbix"
               docker run --rm -v "${GITHUB_WORKSPACE}:/work" -w /work \
                 ghcr.io/pbi-tools/pbi-tools-core:1.2.0 \
-                /root/.dotnet/tools/pbi-tools compile "$proj_dir" artifacts "${name}.pbix" overwrite
+                bash -lc "pbi-tools compile \"$proj_dir\" artifacts \"${name}.pbix\" overwrite"
             done
           '
 
       - name: Upload PBIX artifacts
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: pbix
