@@ -17,9 +17,9 @@ jobs:
         run: |
           docker run --rm -v "${{ github.workspace }}:/work" -w /work \
             ghcr.io/pbi-tools/pbi-tools-core:1.2.0 \
-            bash -lc 'pbi-tools --version'
+            bash -lc 'pbi-tools.core --version'
 
-      # Example real work: compile PBIP -> PBIX
+      # Example: compile all PBIP projects to PBIX/PBIT
       - name: Compile PBIP projects
         run: |
           mkdir -p artifacts
@@ -31,12 +31,6 @@ jobs:
               echo "Compiling $proj_dir → artifacts/${name}.pbix"
               docker run --rm -v "${GITHUB_WORKSPACE}:/work" -w /work \
                 ghcr.io/pbi-tools/pbi-tools-core:1.2.0 \
-                bash -lc "pbi-tools compile \"$proj_dir\" artifacts \"${name}.pbix\" overwrite"
+                bash -lc "pbi-tools.core compile \"$proj_dir\" artifacts \"${name}.pbix\" overwrite"
             done
           '
-
-      - name: Upload PBIX artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: pbix
-          path: artifacts/*.pbix
