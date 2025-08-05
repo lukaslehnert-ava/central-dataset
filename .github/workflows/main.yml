@@ -1,8 +1,7 @@
 # .github/workflows/pbi-tools-install.yml
 name: pbi-tools install & verify
 
-on:
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
   install:
@@ -23,9 +22,9 @@ jobs:
       - name: Inspect tools folder
         run: ls -l tools
 
-      - name: Find & run the CLI binary
+      - name: Find & run the correct binary
         run: |
-          BIN=$(ls tools | head -n1)
-          echo "Found binary: $BIN"
+          BIN=$(ls tools | grep '^pbi-tools' | head -n1)
+          echo "Using binary: $BIN"
           chmod +x tools/$BIN
           tools/$BIN --version
