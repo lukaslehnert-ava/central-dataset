@@ -1,26 +1,21 @@
-# .github/workflows/pbi-tools-docker.yml
-name: pbi-tools via Docker
+# .github/workflows/pbi-tools-check.yml
+name: pbi-tools check
 
 on:
   workflow_dispatch:
 
 jobs:
-  pbi-tools:
+  check:
     runs-on: ubuntu-latest
-
-    # run ALL steps inside this container, as root (so /root/.dotnet/tools is on your PATH)
     container:
-      image: ghcr.io/pbi-tools/pbi-tools-core:1.2.0
+      image: ghcr.io/pbi-tools/pbi-tools-core:latest
       options: --user root
+      env:
+        PATH: /root/.dotnet/tools:${PATH}
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify pbi-tools is on PATH
-        run: |
-          echo "User: $(id -u -n)"
-          echo "PATH: $PATH"
-          which pbi-tools     # should print something like /root/.dotnet/tools/pbi-tools
-          pbi-tools --version
-          pbi-tools --help
+      - name: Verify pbi-tools
+        run: pbi-tools --version
