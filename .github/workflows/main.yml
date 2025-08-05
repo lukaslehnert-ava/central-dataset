@@ -1,4 +1,4 @@
-name: pbi-tools via Docker (inspect + run)
+name: pbi-tools via Docker
 
 on:
   workflow_dispatch:
@@ -6,44 +6,20 @@ on:
 jobs:
   pbi-tools:
     runs-on: ubuntu-latest
+
+    # ← This spins up the container for ALL steps in this job
+    container:
+      image: ghcr.io/pbi-tools/pbi-tools-core:1.2.0
+      # If you get permission errors pulling from GHCR, uncomment:
+      # permissions:
+      #   packages: read
+
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Pull pbi-tools-core image
-        run: docker pull ghcr.io/pbi-tools/pbi-tools-core:latest
-
-      - name: Inspect image metadata
+      - name: Verify pbi-tools
         run: |
-          docker inspect ghcr.io/pbi-tools/pbi-tools-core:latest \
-            --format='ENTRYPOINT={{json .Config.Entrypoint}} CMD={{json .Config.Cmd}}'
-      
-      - name: Version check
-        run: |
-          # Replace <ENTRY> with the Entrypoint value you saw above,
-          # e.g. "/app/run.sh" or "pbi-tools.core".
-          ENTRY=<ENTRY>
-          docker run --rm \
-            --entrypoint "$ENTRY" \
-            -v "${{ github.workspace }}:/work" \
-            -w /work \
-            ghcr.io/pbi-tools/pbi-tools-core:latest \
-            --version
-
-      - name: Compile PBIP → PBIX
-        run: |
-          mkdir -p artifacts
-          ENTRY=<ENTRY>
-          docker run --rm \
-            --entrypoint "$ENTRY" \
-            -v "${{ github.workspace }}:/work" \
-            -w /work \
-            ghcr.io/pbi-tools/pbi-tools-core:latest \
-            compile reports/SalesReport artifacts SalesReport.pbix overwrite
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: pbix
-          path: artifacts/*.pbix
-
+          echo "Which pbi-tools? $(which pbi-tools || echo not found)"
+          pbi-tools --version
+          pbi-tools --help
