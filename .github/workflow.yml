@@ -1,0 +1,25 @@
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # … your pbi-tools install steps …
+
+      - name: Show full repo tree
+        run: ls -R .
+
+      - name: Compile sales-semo.pbip → PBIX
+        run: |
+          mkdir -p artifacts
+          pbi-tools.core compile \
+            <PATH_FROM_TREE>/sales-semo.pbip \
+            artifacts \
+            sales-semo.pbix \
+            overwrite
+
+      - name: Upload PBIX
+        uses: actions/upload-artifact@v4
+        with:
+          name: sales-semo-pbix
+          path: artifacts/sales-semo.pbix
