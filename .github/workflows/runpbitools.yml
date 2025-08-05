@@ -1,0 +1,44 @@
+# .github/workflows/pbi-tools-build.yml
+name: Build Central Dataset PBIP
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'central-dataset/Sales-Cockpit/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # (Your existing install step)
+      - name: Run 
+        run: |
+          mkdir -p tools
+          curl -fsSL \
+            -o tools/pbi-tools.core.1.2.0_linux-x64.zip \
+            https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.core.1.2.0_linux-x64.zip
+          unzip -q tools/pbi-tools.core.1.2.0_linux-x64.zip -d tools
+          chmod +x tools/pbi-tools.core
+      - name: Add CLI to PATH
+        run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
+
+      # Now compile your single PBIP into a PBIX
+      - name: Compile sales-semo.pbip → PBIX
+        run: |
+          mkdir -p artifacts
+          pbi-tools.core compile \
+            central-dataset/Sales-Cockpit/sales-semo.pbip \
+            artifacts \
+            sales-semo.pbix \
+            overwrite
+
+      - name: Upload PBIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sales-semo-pbix
+          path: artifacts/sales-semo.pbix
