@@ -1,0 +1,34 @@
+# .github/workflows/pbip-build.yml
+name: PBIP build
+
+on:
+  pull_request:
+  workflow_dispatch:
+# .github/workflows/pbi-tools-check.yml
+name: pbi-tools check
+on: [workflow_dispatch]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    container: ghcr.io/pbi-tools/pbi-tools-core:1.2.0
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify CLI is available
+        run: pbi-tools --version
+      - name: Compile all PBIP projects to artifacts
+        run: |
+          mkdir -p artifacts
+          shopt -s globstar nullglob
+          for f in **/*.pbip; do
+            proj_dir="$(dirname "$f")"
+            name="$(basename "$proj_dir")"
+            echo "Compiling $proj_dir → artifacts/${name}.pbix"
+            pbi-tools compile "$proj_dir" artifacts "${name}.pbix" overwrite
+          done
+
+      - name: Upload compiled PBIX files
+        uses: actions/upload-artifact@v4
+        with:
+          name: pbip-build-artifacts
+          path: artifacts/*.pbix
