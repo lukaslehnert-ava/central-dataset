@@ -1,6 +1,8 @@
-name: pbi-tools install & inspect
+# .github/workflows/pbi-tools-install.yml
+name: pbi-tools install & verify
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
 
 jobs:
   install:
@@ -9,21 +11,21 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Download Core CLI ZIP
+      - name: Download pbi-tools Core CLI ZIP
         run: |
           mkdir -p tools
           curl -fsSL -o tools/pbi-tools.core.1.2.0_linux-x64.zip \
             https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.core.1.2.0_linux-x64.zip
 
       - name: Unzip CLI into tools/
-        run: |
-          unzip -q tools/pbi-tools.core.1.2.0_linux-x64.zip -d tools
+        run: unzip -q tools/pbi-tools.core.1.2.0_linux-x64.zip -d tools
 
-      - name: See what got unzipped
+      - name: Inspect tools folder
         run: ls -l tools
 
-      - name: Run the actual binary
+      - name: Find & run the CLI binary
         run: |
-          # replace <NAME> below with the filename you saw above, e.g. pbi-tools or pbi-tools.core
-          chmod +x tools/<NAME>
-          tools/<NAME> --version
+          BIN=$(ls tools | head -n1)
+          echo "Found binary: $BIN"
+          chmod +x tools/$BIN
+          tools/$BIN --version
