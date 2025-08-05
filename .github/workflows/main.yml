@@ -1,5 +1,5 @@
-# .github/workflows/pbi-tools-docker.yml
-name: pbi-tools via Docker
+# .github/workflows/pbi-tools.yml
+name: pbi-tools baseline
 
 on:
   workflow_dispatch:
@@ -7,12 +7,31 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    # If your org restricts GHCR pulls, uncomment the next two lines.
+    # permissions:
+    #   packages: read
+    container: ghcr.io/pbi-tools/pbi-tools-core:1.2.0
     steps:
       - uses: actions/checkout@v4
 
-      # Smoke test: confirm pbi-tools is available in the container
+      # Smoke test (works in this container because PATH is set)
       - name: pbi-tools version
+        run: pbi-tools --version
+
+      # Example real step: compile all PBIP projects to PBIX artifacts
+      - name: Compile PBIP to PBIX
         run: |
-          docker run --rm -v "${{ github.workspace }}:/work" -w /work \
-            ghcr.io/pbi-tools/pbi-tools-core:1.2.0 \
-            pbi-tools --version
+          mkdir -p artifacts
+          shopt -s globstar nullglob
+          for f in **/*.pbip; do
+            proj_dir="$(dirname "$f")"
+            name="$(basename "$proj_dir")"
+            echo "Compiling $proj_dir → artifacts/${name}.pbix"
+            pbi-tools compile "$proj_dir" artifacts "${name}.pbix" overwrite
+          done
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pbix
+          path: artifacts/*.pbix
