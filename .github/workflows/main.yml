@@ -8,19 +8,18 @@ jobs:
   pbi-tools:
     runs-on: ubuntu-latest
 
-    # This tells Actions to run *everything* inside the specified container.
-    # It still “runs the docker image,” but you don’t have to do `docker run` yourself.
+    # ← This tells Actions to run *all* steps in the pbi-tools image
     container:
       image: ghcr.io/pbi-tools/pbi-tools-core:1.2.0
-      # If your org blocks anonymous pulls from GHCR, uncomment:
+      # If you hit permission errors pulling from GHCR, add:
       # permissions:
       #   packages: read
 
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify pbi-tools is on PATH
+      - name: Verify pbi-tools is available
         run: |
           pbi-tools --version
           pbi-tools --help
