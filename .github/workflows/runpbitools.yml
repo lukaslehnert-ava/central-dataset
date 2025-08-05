@@ -32,9 +32,7 @@ jobs:
         run: |
           mkdir -p artifacts
           pbi-tools.core compile \
-            central-dataset/Sales-Cockpit/sales-semo.pbip \
-            artifacts \
-            sales-semo.pbix \
+            central-dataset/Sales-Cockpit/sales-semo.pbip
             overwrite
 
       - name: Upload PBIX artifact
