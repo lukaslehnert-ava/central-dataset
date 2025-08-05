@@ -1,26 +1,25 @@
 # .github/workflows/pbi-tools.yml
-name: pbi-tools check
+name: pbi-tools install
 
 on:
   workflow_dispatch:
 
 jobs:
-  pbi-tools:
+  install-and-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '9.0.x'
-
-      - name: Install pbi-tools.core
-        run: dotnet tool install --global pbi-tools.core --version 1.2.0
-
-      - name: Verify and run a command
+      - name: Download pbi-tools CLI
         run: |
-          export PATH="$HOME/.dotnet/tools:$PATH"
-          pbi-tools.core --version
-          # Example: compile your PBIP
-          # pbi-tools.core compile ./reports/MyReport ./artifacts MyReport.pbix overwrite
+          mkdir -p tools
+          curl -L -o tools/pbi-tools.zip \
+            https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.1.2.0_linux-x64.zip
+          unzip -q tools/pbi-tools.zip -d tools
+          chmod +x tools/pbi-tools
+
+      - name: Add CLI to PATH
+        run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
+
+      - name: Verify pbi-tools is installed
+        run: pbi-tools --version
