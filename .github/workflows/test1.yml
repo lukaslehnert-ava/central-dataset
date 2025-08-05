@@ -1,10 +1,11 @@
+# .github/workflows/pbi-tools-build.yml
 name: Build Central Dataset PBIP
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - 'central-dataset/Sales-Cockpit/**'
+      - '**/*.pbip'
 
 jobs:
   build:
@@ -25,20 +26,21 @@ jobs:
       - name: Add CLI to PATH
         run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
 
-      - name: Show repo tree
+      - name: Show repo tree (for debugging)
         run: ls -R .
 
-      - name: Compile sales-semo.pbip → PBIX
+      - name: Compile all PBIP projects
         run: |
           mkdir -p artifacts
-          pbi-tools.core compile \
-            central-dataset/Sales-Cockpit/sales-semo.pbip \
-            artifacts \
-            sales-semo.pbix \
-            overwrite
+          shopt -s globstar nullglob
+          for pbip in $(find . -type f -name '*.pbip'); do
+            name=$(basename "$pbip" .pbip)
+            echo "📊 Compiling $pbip → artifacts/${name}.pbix"
+            pbi-tools.core compile "$pbip" artifacts "${name}.pbix" overwrite
+          done
 
-      - name: Upload PBIX artifact
+      - name: Upload PBIX artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: sales-semo-pbix
-          path: artifacts/sales-semo.pbix
+          name: all-pbix
+          path: artifacts/*.pbix
