@@ -7,19 +7,34 @@ on:
 jobs:
   pbi-tools:
     runs-on: ubuntu-latest
-
-    # ← This tells Actions to run *all* steps in the pbi-tools image
-    container:
-      image: ghcr.io/pbi-tools/pbi-tools-core:1.2.0
-      # If you hit permission errors pulling from GHCR, add:
-      # permissions:
-      #   packages: read
-
     steps:
-      - name: Checkout code
+      - name: checkout
         uses: actions/checkout@v4
 
-      - name: Verify pbi-tools is available
+      - name: Pull the pbi-tools container
+        run: docker pull ghcr.io/pbi-tools/pbi-tools-core:latest
+
+      - name: Smoke-test the CLI
         run: |
-          pbi-tools --version
-          pbi-tools --help
+          docker run --rm \
+            --entrypoint pbi-tools.core \
+            -v "${{ github.workspace }}:/work" \
+            -w /work \
+            ghcr.io/pbi-tools/pbi-tools-core:latest \
+            --version
+
+      - name: Compile PBIP → PBIX
+        run: |
+          mkdir -p artifacts
+          docker run --rm \
+            --entrypoint pbi-tools.core \
+            -v "${{ github.workspace }}:/work" \
+            -w /work \
+            ghcr.io/pbi-tools/pbi-tools-core:latest \
+            compile reports/MyReport artifacts MyReport.pbix overwrite
+
+      - name: Upload PBIX
+        uses: actions/upload-artifact@v4
+        with:
+          name: pbix
+          path: artifacts/*.pbix
