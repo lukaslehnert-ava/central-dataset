@@ -1,3 +1,4 @@
+# .github/workflows/pbi-tools-docker.yml
 name: pbi-tools via Docker
 
 on:
@@ -7,19 +8,19 @@ jobs:
   pbi-tools:
     runs-on: ubuntu-latest
 
-    # ← This spins up the container for ALL steps in this job
+    # run ALL steps inside this container, as root (so /root/.dotnet/tools is on your PATH)
     container:
       image: ghcr.io/pbi-tools/pbi-tools-core:1.2.0
-      # If you get permission errors pulling from GHCR, uncomment:
-      # permissions:
-      #   packages: read
+      options: --user root
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify pbi-tools
+      - name: Verify pbi-tools is on PATH
         run: |
-          echo "Which pbi-tools? $(which pbi-tools || echo not found)"
+          echo "User: $(id -u -n)"
+          echo "PATH: $PATH"
+          which pbi-tools     # should print something like /root/.dotnet/tools/pbi-tools
           pbi-tools --version
           pbi-tools --help
