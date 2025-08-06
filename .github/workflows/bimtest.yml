@@ -23,13 +23,14 @@ jobs:
       # 3. Add CLI to PATH
       - name: Add CLI to PATH
         run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
-
+      
 
       # 5. Generate BIM file for testing
       - name: Generate BIM file
+        working-directory: Sales-Cockpit
         run: |
           set -euo pipefail
           # Generate a BIM file from the Sales-Cockpit project folder
-          tools/pbi-tools.core generate-bim \
-            Sales-Cockpit \
-            Sales-Cockpit/model.bim
+          # Use RemovePBIDataSourceVersion transform to clear versioning
+          tools/pbi-tools.core generate-bim . RemovePBIDataSourceVersion
+          echo "BIM file generated at Sales-Cockpit/model.bim"
