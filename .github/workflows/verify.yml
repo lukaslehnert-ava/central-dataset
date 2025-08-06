@@ -1,4 +1,4 @@
-name: PBI Tools CI VERIFY
+name: PBI Tools CI
 on:
   workflow_dispatch:
 
@@ -24,9 +24,9 @@ jobs:
       - name: Add CLI to PATH
         run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
 
-      # 4. Verify pbi-tools installation
+            # 4. Verify pbi-tools installation
       - name: Verify pbi-tools CLI
         run: |
           set -euo pipefail
           echo "pbi-tools CLI version:" && tools/pbi-tools.core info
-          echo "Help output:" && tools/pbi-tools.core --help
+          # Note: The CLI does not support --help or help actions in core edition
