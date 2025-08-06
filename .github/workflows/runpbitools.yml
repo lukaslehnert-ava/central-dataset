@@ -27,23 +27,36 @@ jobs:
       - name: Add CLI to PATH
         run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
 
-      # 4. Compile Sales-Cockpit .pbip folder into PBIX
+      # 4. Detect and compile .pbip project
       - name: Compile Sales-Cockpit project
         run: |
           set -euo pipefail
-          PROJECT_FOLDER="Sales-Cockpit/sales-semo.pbip"
-          # Ensure PBIP folder exists
-          if [ ! -d "$PROJECT_FOLDER" ]; then
-            echo "Error: PBIP folder not found at $PROJECT_FOLDER"
+          PROJECT_PATH="Sales-Cockpit"
+          INPUT="${PROJECT_PATH}/sales-semo.pbip"
+          # Determine if input is a file or folder
+          if [ -f "$INPUT" ]; then
+            echo "Detected PBIP file: $INPUT"
+            TEMP_DIR="${PROJECT_PATH}/.pbi_extract"
+            mkdir -p "$TEMP_DIR"
+            echo "Extracting PBIP to $TEMP_DIR..."
+            unzip -q "$INPUT" -d "$TEMP_DIR"
+            WORKDIR="$TEMP_DIR"
+          elif [ -d "$INPUT" ]; then
+            echo "Detected PBIP folder: $INPUT"
+            WORKDIR="$INPUT"
+          else
+            echo "Error: PBIP not found at $INPUT"
             exit 1
           fi
-          # Create output directory
-          mkdir -p "Sales-Cockpit/output"
-          # Compile project folder into PBIX
-          tools/pbi-tools.core compile \
-            "$PROJECT_FOLDER" \
-            "Sales-Cockpit/output/sales-semo.pbix"
+          # Prepare output
+          OUT_DIR="${PROJECT_PATH}/output"
+          mkdir -p "$OUT_DIR"
+          OUT_FILE="$OUT_DIR/$(basename "${INPUT%.*}.pbix")"
+          echo "Compiling from $WORKDIR to $OUT_FILE..."
+          tools/pbi-tools.core compile "$WORKDIR" "$OUT_FILE"
 
       # 5. Verify pbi-tools installation
       - name: Verify pbi-tools installation
-        run: tools/pbi-tools.core info
+        run: |
+          set -euo pipefail
+          tools/pbi-tools.core info
