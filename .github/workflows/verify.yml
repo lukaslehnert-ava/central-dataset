@@ -1,0 +1,32 @@
+name: PBI Tools CI
+on:
+  workflow_dispatch:
+
+jobs:
+  sanity-check-pbi-tools:
+    name: Sanity Check pbi-tools CLI
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Download and install pbi-tools core CLI
+      - name: Download pbi-tools core CLI
+        run: |
+          mkdir -p tools
+          curl -fsSL -o tools/pbi-tools.core.1.2.0_linux-x64.zip \
+            https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.core.1.2.0_linux-x64.zip
+          unzip -q tools/pbi-tools.core.1.2.0_linux-x64.zip -d tools
+          chmod +x tools/pbi-tools.core
+
+      # 3. Add CLI to PATH
+      - name: Add CLI to PATH
+        run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
+
+      # 4. Verify pbi-tools installation
+      - name: Verify pbi-tools CLI
+        run: |
+          set -euo pipefail
+          echo "pbi-tools CLI version:" && tools/pbi-tools.core info
+          echo "Help output:" && tools/pbi-tools.core help
