@@ -1,4 +1,4 @@
-name: PBI Tools CI
+name: Verify tool
 on:
   workflow_dispatch:
 
