@@ -20,17 +20,15 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-            # Install pbi-tools as a global .NET tool (latest stable version)
+      # Install pbi-tools as a global .NET tool (latest stable version)
       - name: Install pbi-tools
         run: |
-          # Install without specifying version to get the latest stable
-          dotnet tool install --global pbi.tools && \
-          # If you need a specific version, e.g., 1.2.0, uncomment the next line
+          # Install without specifying a specific version to pull latest stable
+          dotnet tool install --global pbi.tools
+          # To pin a version, uncomment and set your desired version:
           # dotnet tool install --global pbi.tools --version 1.2.0 --prerelease
 
       # Add the .NET global tools directory to PATH
-      - name: Add dotnet tools to PATH
-        run: echo "${HOME}/.dotnet/tools" >> $GITHUB_PATH
       - name: Add dotnet tools to PATH
         run: echo "${HOME}/.dotnet/tools" >> $GITHUB_PATH
 
