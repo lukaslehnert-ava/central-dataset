@@ -17,18 +17,18 @@ jobs:
 
     - name: Setup pbi-tools
       run: |
-        # Pull the correct pbi-tools Docker image
-        docker pull ghcr.io/pbi-tools/pbi-tools:latest
+        # Download and install pbi-tools CLI directly
+        wget -O pbi-tools.zip https://github.com/pbi-tools/pbi-tools/releases/download/1.0.0-rc.4/pbi-tools.1.0.0-rc.4.zip
+        unzip pbi-tools.zip -d pbi-tools
+        chmod +x pbi-tools/pbi-tools
+        echo "${{ github.workspace }}/pbi-tools" >> $GITHUB_PATH
 
     - name: Validate PBIP files
       run: |
         # Find all PBIP files and validate them
         find . -name "*.pbip" -type f | while read pbip_file; do
           echo "Validating: $pbip_file"
-          docker run --rm \
-            -v ${{ github.workspace }}:/workspace \
-            ghcr.io/pbi-tools/pbi-tools:latest \
-            info "/workspace/$pbip_file"
+          pbi-tools info "$pbip_file"
         done
 
     - name: Build PBIX from PBIP
@@ -37,11 +37,7 @@ jobs:
         find . -name "*.pbip" -type f | while read pbip_file; do
           pbix_output="${pbip_file%.pbip}.pbix"
           echo "Building PBIX: $pbix_output from $pbip_file"
-          
-          docker run --rm \
-            -v ${{ github.workspace }}:/workspace \
-            ghcr.io/pbi-tools/pbi-tools:latest \
-            compile "/workspace/$pbip_file" -format PBIX -outPath "/workspace/$pbix_output"
+          pbi-tools compile "$pbip_file" -format PBIX -outPath "$pbix_output"
         done
 
     - name: Upload built PBIX files
