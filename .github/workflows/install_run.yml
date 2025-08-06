@@ -14,34 +14,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Install the appropriate .NET SDK (pbi-tools core requires .NET 8)
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '8.0.x'
-
-      # Install pbi-tools as a global .NET tool (latest stable version)
-      - name: Install pbi-tools
+            # Download and install pbi-tools core CLI directly
+      - name: Download Core CLI ZIP
         run: |
-          # Install without specifying a specific version to pull latest stable
-          dotnet tool install --global pbi.tools
-          # To pin a version, uncomment and set your desired version:
-          # dotnet tool install --global pbi.tools --version 1.2.0 --prerelease
+          mkdir -p tools
+          curl -fsSL -o tools/pbi-tools.core.1.2.0_linux-x64.zip \
+            https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.core.1.2.0_linux-x64.zip
+          unzip -q tools/pbi-tools.core.1.2.0_linux-x64.zip -d tools
+          chmod +x tools/pbi-tools.core
 
-      # Add the .NET global tools directory to PATH
-      - name: Add dotnet tools to PATH
-        run: echo "${HOME}/.dotnet/tools" >> $GITHUB_PATH
+      - name: Add CLI to PATH
+        run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
 
       # Compile the PBIP-based project
-      # Uses working-directory to point at the .pbip project root
       - name: Compile Sales-Cockpit Project
         working-directory: central-dataset/Sales-Cockpit
         run: |
           # Create an output folder for the generated PBIX
           mkdir -p output
           # Compile the project ('.' refers to the folder containing sales-semo.pbip)
-          pbi-tools compile . ./output/sales-semo.pbix
+          tools/pbi-tools.core compile . ./output/sales-semo.pbix
 
       # Optional: Print diagnostic info about the environment
-      - name: Display pbi-tools Info
+      - name: Verify pbi-tools installation
+        run: tools/pbi-tools.core info
         run: pbi-tools info
