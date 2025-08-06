@@ -1,4 +1,4 @@
-name: PBI Tools CI
+name: PBI Tools CI (install success)
 on:
   push:
     branches:
