@@ -27,14 +27,14 @@ jobs:
       - name: Add CLI to PATH
         run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
 
-      # Step 4: Compile the PBIP-based project using working-directory
+      # Step 4: Compile the PBIP-based project using the correct folder path
       - name: Compile Sales-Cockpit Project
-        working-directory: central-dataset/Sales-Cockpit
+        working-directory: Sales-Cockpit
         run: |
           set -euo pipefail
-          # Ensure output directory exists
+          # Ensure output directory exists in Sales-Cockpit
           mkdir -p output
-          # Compile project in current folder
+          # Compile the project in the current directory
           pbi-tools.core compile . ./output/sales-semo.pbix
 
       # Step 5: Verify pbi-tools installation
