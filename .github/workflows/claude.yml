@@ -1,0 +1,54 @@
+name: Claude flow
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup pbi-tools
+      run: |
+        # Pull the latest pbi-tools Docker image
+        docker pull pbitools/pbi-tools:latest
+
+    - name: Validate PBIP files
+      run: |
+        # Find all PBIP files and validate them
+        find . -name "*.pbip" -type f | while read pbip_file; do
+          echo "Validating: $pbip_file"
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            pbitools/pbi-tools:latest \
+            info "/workspace/$pbip_file"
+        done
+
+    - name: Build PBIX from PBIP
+      run: |
+        # Find PBIP files and compile them to PBIX
+        find . -name "*.pbip" -type f | while read pbip_file; do
+          pbix_output="${pbip_file%.pbip}.pbix"
+          echo "Building PBIX: $pbix_output from $pbip_file"
+          
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            pbitools/pbi-tools:latest \
+            compile "/workspace/$pbip_file" -format PBIX -outPath "/workspace/$pbix_output"
+        done
+
+    - name: Upload built PBIX files
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: pbix-files-${{ github.run_number }}
+        path: |
+          **/*.pbix
+        retention-days: 30
