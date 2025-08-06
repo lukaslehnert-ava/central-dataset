@@ -1,4 +1,4 @@
-name: PBI Tools CI
+name: Deployment Successful + Info Print
 on:
   workflow_dispatch:
 
