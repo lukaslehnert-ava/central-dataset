@@ -29,7 +29,7 @@ jobs:
 
       # Step 4: Compile the PBIP-based project
       - name: Compile Sales-Cockpit Project
-        working-directory: central-dataset/Sales-Cockpit
+        working-directory: Sales-Cockpit
         run: |
           set -euo pipefail
           mkdir -p output
