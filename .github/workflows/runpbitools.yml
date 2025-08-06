@@ -10,11 +10,11 @@ jobs:
     name: Run pbi-tools CLI in GitHub Actions
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout repository
+      # 1. Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Download and install pbi-tools core CLI directly
+      # 2. Download and install pbi-tools core CLI directly
       - name: Download Core CLI ZIP
         run: |
           mkdir -p tools
@@ -23,22 +23,30 @@ jobs:
           unzip -q tools/pbi-tools.core.1.2.0_linux-x64.zip -d tools
           chmod +x tools/pbi-tools.core
 
-      # Step 3: Add CLI to PATH
+      # 3. Add CLI to PATH
       - name: Add CLI to PATH
         run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
 
-      # Step 4: Compile the PBIP-based project using the correct folder path
-      - name: Compile Sales-Cockpit Project
-        working-directory: Sales-Cockpit
+      # 4. Extract .pbip project into a folder structure
+      - name: Extract PBIP project
         run: |
           set -euo pipefail
-          # Ensure output directory exists in Sales-Cockpit
-          mkdir -p output
-          # Compile the project in the current directory
-          pbi-tools.core compile . ./output/sales-semo.pbix
+          mkdir -p central-dataset/Sales-Cockpit/extracted
+          tools/pbi-tools.core extract \
+            "central-dataset/Sales-Cockpit/sales-semo.pbip" \
+            "central-dataset/Sales-Cockpit/extracted"
 
-      # Step 5: Verify pbi-tools installation
+      # 5. Compile the extracted project into a PBIX
+      - name: Compile extracted project
+        run: |
+          set -euo pipefail
+          mkdir -p central-dataset/Sales-Cockpit/output
+          tools/pbi-tools.core compile \
+            "central-dataset/Sales-Cockpit/extracted" \
+            "central-dataset/Sales-Cockpit/output/sales-semo.pbix"
+
+      # 6. Verify pbi-tools installation
       - name: Verify pbi-tools installation
         run: |
           set -euo pipefail
-          pbi-tools.core info
+          tools/pbi-tools.core info
