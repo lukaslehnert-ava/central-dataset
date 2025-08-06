@@ -27,16 +27,27 @@ jobs:
       - name: Add CLI to PATH
         run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
 
-      # 4. Extract .pbip project into a folder structure
-      - name: Extract PBIP project
+      # 4. Unpack .pbip project into a folder structure
+      - name: Unpack PBIP project
         run: |
           set -euo pipefail
+          # Create folder for unpacked contents
           mkdir -p central-dataset/Sales-Cockpit/extracted
-          tools/pbi-tools.core extract \
+          # Use 'unpack' command to extract PBIP (zip) contents
+          tools/pbi-tools.core unpack \
             "central-dataset/Sales-Cockpit/sales-semo.pbip" \
             "central-dataset/Sales-Cockpit/extracted"
 
-      # 5. Compile the extracted project into a PBIX
+      # 5. Compile the unpacked project into a PBIX
+      - name: Compile unpacked project
+        run: |
+          set -euo pipefail
+          mkdir -p central-dataset/Sales-Cockpit/output
+          tools/pbi-tools.core compile \
+            "central-dataset/Sales-Cockpit/extracted" \
+            "central-dataset/Sales-Cockpit/output/sales-semo.pbix"
+
+      # 6. Verify pbi-tools installation. Compile the extracted project into a PBIX
       - name: Compile extracted project
         run: |
           set -euo pipefail
