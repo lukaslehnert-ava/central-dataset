@@ -1,42 +1,44 @@
-# .github/workflows/pbi-tools-build.yml
-name: Build Central Dataset PBIP
-
+name: PBI Tools CI
 on:
-  workflow_dispatch:
   push:
-    paths:
-      - 'Sales-Cockpit/**'
+    branches:
+      - main
+  workflow_dispatch: {}
 
 jobs:
-  build:
+  run-pbi-tools:
+    name: Run pbi-tools CLI in GitHub Actions
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      # (Your existing install step)
-      - name: Run 
+      # Step 2: Download and install pbi-tools core CLI directly
+      - name: Download Core CLI ZIP
         run: |
           mkdir -p tools
-          curl -fsSL \
-            -o tools/pbi-tools.core.1.2.0_linux-x64.zip \
+          curl -fsSL -o tools/pbi-tools.core.1.2.0_linux-x64.zip \
             https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.core.1.2.0_linux-x64.zip
           unzip -q tools/pbi-tools.core.1.2.0_linux-x64.zip -d tools
           chmod +x tools/pbi-tools.core
+
+      # Step 3: Add CLI to PATH
       - name: Add CLI to PATH
         run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
 
-      # Now compile your single PBIP into a PBIX
-      - name: Compile sales-semo.pbip → PBIX
+      # Step 4: Compile the PBIP-based project using working-directory
+      - name: Compile Sales-Cockpit Project
+        working-directory: central-dataset/Sales-Cockpit
         run: |
-          mkdir -p artifacts
-          pbi-tools.core compile \
-            Sales-Cockpit/sales-semo.pbip
-            overwrite
+          set -euo pipefail
+          # Ensure output directory exists
+          mkdir -p output
+          # Compile project in current folder
+          pbi-tools.core compile . ./output/sales-semo.pbix
 
-      - name: Upload PBIX artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sales-semo-pbix
-          path: artifacts/sales-semo.pbix
+      # Step 5: Verify pbi-tools installation
+      - name: Verify pbi-tools installation
+        run: |
+          set -euo pipefail
+          pbi-tools.core info
