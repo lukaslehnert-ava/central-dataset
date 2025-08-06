@@ -31,8 +31,8 @@ jobs:
       - name: Compile Sales-Cockpit .pbip
         run: |
           set -euo pipefail
-          # Define base path
-          PROJECT_PATH="central-dataset/Sales-Cockpit"
+          # Define base path relative to workspace root
+          PROJECT_PATH="Sales-Cockpit"
           # Create output directory
           mkdir -p "$PROJECT_PATH/output"
           # Compile the .pbip (folder) directly
@@ -40,7 +40,7 @@ jobs:
             "$PROJECT_PATH/sales-semo.pbip" \
             "$PROJECT_PATH/output/sales-semo.pbix"
 
-      # 5. Verify installation. Verify installation
+      # 5. Verify installation. Verify installation. Verify installation
       - name: Verify pbi-tools installation
         run: |
           set -euo pipefail
