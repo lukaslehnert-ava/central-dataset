@@ -38,4 +38,4 @@ jobs:
       # Optional: Print diagnostic info about the environment
       - name: Verify pbi-tools installation
         run: tools/pbi-tools.core info
-        run: pbi-tools info
+      
