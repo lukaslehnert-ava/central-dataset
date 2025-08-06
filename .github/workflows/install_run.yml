@@ -27,14 +27,23 @@ jobs:
       - name: Add CLI to PATH
         run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
 
-      # Step 4: Compile the PBIP-based project
+      # Step 4: Compile the PBIP-based project from repository root
       - name: Compile Sales-Cockpit Project
-        working-directory: Sales-Cockpit
         run: |
           set -euo pipefail
-          mkdir -p output
-          tools/pbi-tools.core compile . ./output/sales-semo.pbix
+          # Ensure output directory exists
+          mkdir -p central-dataset/Sales-Cockpit/output
+
+          # Invoke the CLI directly (binary is on PATH via tools folder)
+          pbi-tools.core compile \
+            central-dataset/Sales-Cockpit \
+            central-dataset/Sales-Cockpit/output/sales-semo.pbix
 
       # Step 5: Verify pbi-tools installation
+      - name: Verify pbi-tools installation
+        run: |
+          set -euo pipefail
+          # Print version and environment info
+          pbi-tools.core info
       - name: Verify pbi-tools installation
         run: tools/pbi-tools.core info
