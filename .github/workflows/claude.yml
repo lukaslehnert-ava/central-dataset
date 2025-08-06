@@ -1,4 +1,4 @@
-name: Claude flow
+name: Process PBIP with pbi-tools
 
 on:
   push:
@@ -17,8 +17,8 @@ jobs:
 
     - name: Setup pbi-tools
       run: |
-        # Pull the latest pbi-tools Docker image
-        docker pull pbitools/pbi-tools:latest
+        # Pull the correct pbi-tools Docker image
+        docker pull ghcr.io/pbi-tools/pbi-tools:latest
 
     - name: Validate PBIP files
       run: |
@@ -27,7 +27,7 @@ jobs:
           echo "Validating: $pbip_file"
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
-            pbitools/pbi-tools:latest \
+            ghcr.io/pbi-tools/pbi-tools:latest \
             info "/workspace/$pbip_file"
         done
 
@@ -40,7 +40,7 @@ jobs:
           
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
-            pbitools/pbi-tools:latest \
+            ghcr.io/pbi-tools/pbi-tools:latest \
             compile "/workspace/$pbip_file" -format PBIX -outPath "/workspace/$pbix_output"
         done
 
