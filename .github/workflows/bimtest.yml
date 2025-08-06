@@ -15,10 +15,10 @@ jobs:
       - name: Download pbi-tools core CLI
         run: |
           mkdir -p tools
-          curl -fsSL -o tools/pbi-tools.core.1.2.0_linux-x64.zip \
+          curl -fsSL -o pbi-tools.core.1.2.0_linux-x64.zip \
             https://github.com/pbi-tools/pbi-tools/releases/download/1.2.0/pbi-tools.core.1.2.0_linux-x64.zip
-          unzip -q tools/pbi-tools.core.1.2.0_linux-x64.zip -d tools
-          chmod +x tools/pbi-tools.core
+          unzip -q pbi-tools.core.1.2.0_linux-x64.zip -d tools
+          chmod +x pbi-tools.core
 
       # 3. Add CLI to PATH
       - name: Add CLI to PATH
@@ -32,5 +32,5 @@ jobs:
           set -euo pipefail
           # Generate a BIM file from the Sales-Cockpit project folder
           # Use RemovePBIDataSourceVersion transform to clear versioning
-          tools/pbi-tools.core generate-bim . RemovePBIDataSourceVersion
+          pbi-tools.core generate-bim . RemovePBIDataSourceVersion
           echo "BIM file generated at Sales-Cockpit/model.bim"
