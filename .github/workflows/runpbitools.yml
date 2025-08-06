@@ -10,11 +10,11 @@ jobs:
     name: Run pbi-tools CLI in GitHub Actions
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout the repository
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Download and install pbi-tools core CLI directly
+      # 2. Download and install pbi-tools core CLI
       - name: Download Core CLI ZIP
         run: |
           mkdir -p tools
@@ -27,18 +27,20 @@ jobs:
       - name: Add CLI to PATH
         run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
 
-      # 4. Compile the PBIP project folder directly
-      - name: Compile Sales-Cockpit Project
+      # 4. Compile the PBIP project into PBIX
+      - name: Compile Sales-Cockpit .pbip
         run: |
           set -euo pipefail
-          # Ensure output directory exists
-          mkdir -p central-dataset/Sales-Cockpit/output
-          # Compile the .pbip folder into a PBIX
+          # Define base path
+          PROJECT_PATH="central-dataset/Sales-Cockpit"
+          # Create output directory
+          mkdir -p "$PROJECT_PATH/output"
+          # Compile the .pbip (folder) directly
           tools/pbi-tools.core compile \
-            central-dataset/Sales-Cockpit/sales-semo.pbip \
-            central-dataset/Sales-Cockpit/output/sales-semo.pbix
+            "$PROJECT_PATH/sales-semo.pbip" \
+            "$PROJECT_PATH/output/sales-semo.pbix"
 
-      # 5. Verify pbi-tools installation
+      # 5. Verify installation. Verify installation
       - name: Verify pbi-tools installation
         run: |
           set -euo pipefail
