@@ -1,0 +1,44 @@
+name: PBI Tools CI
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+jobs:
+  run-pbi-tools:
+    name: Run pbi-tools CLI in GitHub Actions
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository so we can access project files
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Install the appropriate .NET SDK (pbi-tools core requires .NET 8)
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      # Install pbi-tools as a global .NET tool (adjust version as needed)
+      - name: Install pbi-tools
+        run: |
+          dotnet tool install --global pbi.tools --version 1.0.0-beta.7
+
+      # Add the .NET global tools directory to PATH
+      - name: Add dotnet tools to PATH
+        run: echo "${HOME}/.dotnet/tools" >> $GITHUB_PATH
+
+      # Compile the PBIP-based project
+      # Uses working-directory to point at the .pbip project root
+      - name: Compile Sales-Cockpit Project
+        working-directory: central-dataset/Sales-Cockpit
+        run: |
+          # Create an output folder for the generated PBIX
+          mkdir -p output
+          # Compile the project ('.' refers to the folder containing sales-semo.pbip)
+          pbi-tools compile . ./output/sales-semo.pbix
+
+      # Optional: Print diagnostic info about the environment
+      - name: Display pbi-tools Info
+        run: pbi-tools info
