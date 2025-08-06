@@ -28,19 +28,24 @@ jobs:
         run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
 
       # 4. Compile the PBIP project into PBIX
-      - name: Compile Sales-Cockpit .pbip
+      - name: Compile Sales-Cockpit project
         run: |
           set -euo pipefail
-          # Define base path relative to workspace root
-          PROJECT_PATH="Sales-Cockpit"
+          # Define the path to your PBIP project
+          PROJECT_PATH="central-dataset/Sales-Cockpit"
+          # Ensure the project folder exists
+          if [ ! -d "$PROJECT_PATH/sales-semo.pbip" ]; then
+            echo "Error: PBIP folder not found at $PROJECT_PATH/sales-semo.pbip"
+            exit 1
+          fi
           # Create output directory
           mkdir -p "$PROJECT_PATH/output"
-          # Compile the .pbip (folder) directly
+          # Run the compile command
           tools/pbi-tools.core compile \
             "$PROJECT_PATH/sales-semo.pbip" \
             "$PROJECT_PATH/output/sales-semo.pbix"
 
-      # 5. Verify installation. Verify installation. Verify installation
+      # 5. Verify pbi-tools installation
       - name: Verify pbi-tools installation
         run: |
           set -euo pipefail
