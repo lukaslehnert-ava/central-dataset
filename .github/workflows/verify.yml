@@ -1,4 +1,4 @@
-name: Verify tool
+name: PBI Tools CI VERIFY
 on:
   workflow_dispatch:
 
@@ -29,4 +29,4 @@ jobs:
         run: |
           set -euo pipefail
           echo "pbi-tools CLI version:" && tools/pbi-tools.core info
-          echo "Help output:" && tools/pbi-tools.core help
+          echo "Help output:" && tools/pbi-tools.core --help
