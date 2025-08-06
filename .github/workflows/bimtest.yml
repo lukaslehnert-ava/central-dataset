@@ -1,4 +1,4 @@
-name: VERIFY
+name: bimtest
 on:
   workflow_dispatch:
 
@@ -24,6 +24,7 @@ jobs:
       - name: Add CLI to PATH
         run: echo "${{ github.workspace }}/tools" >> $GITHUB_PATH
 
+
       # 5. Generate BIM file for testing
       - name: Generate BIM file
         run: |
@@ -31,4 +32,4 @@ jobs:
           # Generate a BIM file from the Sales-Cockpit project folder
           tools/pbi-tools.core generate-bim \
             Sales-Cockpit \
-            --out Sales-Cockpit/model.bim
+            Sales-Cockpit/model.bim
